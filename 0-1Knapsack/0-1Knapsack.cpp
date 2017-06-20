@@ -13,20 +13,23 @@ int main()
 	scanf_s("%d", &W); // input can carry weight
 	rewind(stdin);
 	scanf_s("%d", &n); // input the number of items
-	
+
 	for (int i = 0; i < n; i++)
 	{
 		int itemWeight, itemValue;
 		Item newItem;
+		rewind(stdin);
 		scanf_s("%d %d", &itemWeight, &itemValue); // input one pair of item's properties
 		newItem.itemWeight = itemWeight;
 		newItem.itemValue = itemValue;
 
-		items.push_back(newItem); 
+		items.push_back(newItem);
 	}
-	int** c; // DP table, create a ( n + 1 ) rows , ( W + 1 ) colummns table
+	//sort(items.begin(), items.end(), compareByWeight);
+
+	int** c; // DP table, max, Total Value for the items 1 ~ i and the knapsack W
 	bool** takeItems; // determine each item whether take it or not
-	c = (int**)calloc(n + 1, sizeof(int *));
+	c = (int**)calloc(n + 1, sizeof(int *));  // create a(n + 1) rows, (W + 1) colummns table
 	takeItems = (bool**)calloc(n + 1, sizeof(bool *));
 	for (int i = 0; i < n + 1; i++)
 	{
@@ -34,6 +37,7 @@ int main()
 		takeItems[i] = (bool *)calloc(W + 1, sizeof(bool));
 	}
 	// initial table as c[n+1][W+1] = 0 when n == 0 or i == 0
+
 	for (int i = 0; i < n + 1; i++)
 	{
 		c[i][0] = 0;
@@ -43,7 +47,8 @@ int main()
 		c[0][i] = 0;
 	}
 
-	// exhaustive loop for every items and every weights
+	// exhaustive all the possibility for every items and every weights
+	
 	for(int i = 1; i < n + 1; i++)
 	{
 		for (int j = 1; j < W + 1; j++)
@@ -51,17 +56,35 @@ int main()
 			if (items[i-1].itemWeight > j)	// if Wi > W
 				c[i][j] = c[i - 1][j];
 			else {	// if Wi <= W
-				c[i][j] = max(c[i - 1][j], c[i - 1][j - items[i - 1].itemWeight] + items[i - 1].itemValue ); 
+				c[i][j] = max(c[i - 1][j], c[i - 1][j - items[i - 1].itemWeight] + items[i - 1].itemValue );
 				if ((c[i - 1][j - items[i - 1].itemWeight] + items[i - 1].itemValue) > c[i - 1][j]) // if take the items total value will be higher
 					takeItems[i][j] = true;  // take the item
-				else 
+				else
 					takeItems[i][j] = false;
 			}
 		}
 	}
-
 	
+	/*
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j <= W; j++)
+		{
+			if (items[i].itemWeight > j)	// if Wi > W
+				c[i + 1][j] = c[i][j];
+			else {	// if Wi <= W
+				c[i + 1][j] = max(c[i][j], c[i][j - items[i].itemWeight] + items[i].itemValue);
+				if ((c[i][j - items[i].itemWeight] + items[i].itemValue) > c[i][j]) // if take the items total value will be higher
+					takeItems[i][j] = true;  // take the item
+				else
+					takeItems[i][j] = false;
+			}
+		}
+	}
+	*/
+
 	stack<int> printTakeItems;
+	
 	for (int i = n, j = W; i >= 0; i--)
 	{
 		if (takeItems[i][j]) // if current item has been taken
@@ -71,7 +94,18 @@ int main()
 			j = j - items[i - 1].itemWeight; // total weight the thief can taken away decrease current item's weight
 		}
 	}
-
+	
+	/*
+	for (int i = n, j = W; i >= 0; i--)
+	{
+		if (takeItems[i][j]) // if current item has been taken
+		{
+			//cout << i << ", ";
+			printTakeItems.push(i);
+			j = j - items[i].itemWeight; // total weight the thief can taken away decrease current item's weight
+		}
+	}
+	*/
 	cout << "Total Value = " << c[n][W] << endl;
 	cout << "Items ";
 	while (!printTakeItems.empty())
@@ -85,7 +119,12 @@ int main()
 
 	system("pause");
 
-    return 0;
+	return 0;
+}
+
+bool compareByWeight(const Item A, const Item B)
+{
+	return A.itemWeight < B.itemWeight;
 }
 
 

@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <stack>
 
+
 typedef struct item
 {
 	int itemWeight;
@@ -23,6 +24,8 @@ typedef struct item
 using namespace std;
 
 
+bool compareByWeight(const Item A, const Item B);
+//void knapsack(int n, int w);
 
 
 // TODO: reference additional headers your program requires here
